@@ -4,7 +4,7 @@ from urllib import parse
 import requests
 
 app = FastAPI()
-api_key = "RGAPI-2f55abb9-4943-4b33-8e01-84a3a415964a"
+api_key = "RGAPI-f0bf5a5f-6c26-4dd2-a2bd-80f7cf3b047b"
 headers = {
     "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.0.0 Safari/537.36",
     "Accept-Language": "ko-KR,ko;q=0.9,en-US;q=0.8,en;q=0.7,ru;q=0.6",
