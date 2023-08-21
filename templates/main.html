@@ -1,14 +1,23 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <title>Item Details</title>
-    <link href="{{ url_for('static', path='/style.css') }}" rel="stylesheet">
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <script>
+        document.addEventListener('DOMContentLoaded', (event) => {
+            document.getElementById("myForm").addEventListener("submit", function (e) {
+               var myForm = document.getElementById('myForm');
+               var account_name = document.getElementById('search_nickname').value;
+               myForm.action = '/accounts/' + account_name;
+            });
+         });
+    </script>
 </head>
 <body>
-    <img src="//ddragon.leagueoflegends.com/cdn/13.16.1/img/profileicon/{{profile_icon}}.png" class="profile_icon" alt="profile_icon">
-    <h1>{{nickname}}</h1>
-    <h1>Current tier & rank</h1>
-    <h1>{{tier}} {{rank}}</h1>
-    <img src="/static/img/emblem-{{tier}}.png" class="tier" alt="tier">
+<form method="post" id="myForm">
+    <div>Nickname</div>
+    <input type="text" id="search_nickname" placeholder="Type your nickname"/>
+    <button>Search</button>
+</form>
 </body>
 </html>

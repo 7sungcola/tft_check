@@ -1,13 +1,13 @@
 import requests, time
 
-from fastapi import FastAPI, Request
+from fastapi import FastAPI, Request, Form
 from fastapi.templating import Jinja2Templates
 from fastapi.responses import HTMLResponse
 from fastapi.staticfiles import StaticFiles
 
 app = FastAPI()
 app.mount("/static", StaticFiles(directory="static"), name="static")
-api_key = "RGAPI-258cbdd1-3dfa-466d-9e6a-60267ec6e1f5"
+api_key = "RGAPI-90120bf3-1f8f-4bef-8639-6db419e8d5c9"
 templates = Jinja2Templates(directory="templates")
 
 headers = {
@@ -17,23 +17,25 @@ headers = {
     "Origin": "https://developer.riotgames.com",
     "X-Riot-Token": api_key
 }
+@app.get("/", response_class=HTMLResponse)      # main page with nickname search
+async def search_nickname(request: Request):
+    return templates.TemplateResponse("main.html", {"request" : request})
 
-@app.get('/')
-def hello_world():
-	return {'message':'hello'}
-
-@app.get("/accounts/{account_name}", response_class=HTMLResponse)        # get account info using nickname
+@app.post("/accounts/{account_name}", response_class=HTMLResponse)        # get account info using nickname
 async def get_acc_info(request: Request, account_name: str):
     url = 'https://kr.api.riotgames.com/tft/summoner/v1/summoners/by-name/' + account_name
     get_info = requests.get(url, headers=headers)
     puuid = get_info.json()['puuid']
     profile_icon = get_info.json()['profileIconId']
+    name_list = []
 
     match_list = get_match_ids(puuid)
     latest_match = match_list[0]
+    for i in range(len(match_list)):
+        name_list.append(get_match_participants(match_list[i]))
 
     leagueid = get_info.json()['id']
-    tier_rank = get_summoner_info(leagueid)
+    tier_rank = get_summoner_tier(leagueid)
     tier = tier_rank.split()[0]
     rank = tier_rank.split()[1]
 
@@ -42,10 +44,11 @@ async def get_acc_info(request: Request, account_name: str):
         "nickname" : account_name,
         "tier" : tier,
         "rank" : rank,
-        "profile_icon" : profile_icon
+        "profile_icon" : profile_icon,
+        "name_list" : name_list
     }
 
-    return templates.TemplateResponse("main.html", result)
+    return templates.TemplateResponse("info.html", result)
 
 @app.get("/server")     # check current server status
 def server_status():
@@ -56,7 +59,7 @@ def server_status():
 
 @app.get("/matches/by-puuid/{puuid}")      # get match ids using puuid
 def get_match_ids(puuid: str):
-    url = f'https://asia.api.riotgames.com/tft/match/v1/matches/by-puuid/{puuid}/ids?start=0&count=10'
+    url = f'https://asia.api.riotgames.com/tft/match/v1/matches/by-puuid/{puuid}/ids?start=0&count=5'
     get_info = requests.get(url, headers=headers)
 
     return get_info.json()
@@ -93,7 +96,7 @@ def get_summoner_name(puuid: str):
 
 
 # get summoner's tier and rank
-def get_summoner_info(leagueid: str):
+def get_summoner_tier(leagueid: str):
     url = f'https://kr.api.riotgames.com/tft/league/v1/entries/by-summoner/{leagueid}'
     get_info = requests.get(url, headers=headers)
     tier = get_info.json()[0]['tier']
